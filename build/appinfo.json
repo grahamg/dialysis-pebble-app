@@ -1,0 +1,25 @@
+{
+    "displayName": "Dialysis Calc",
+    "uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "sdkVersion": "3",
+    "enableMultiJS": false,
+    "targetPlatforms": [
+        "aplite",
+        "basalt",
+        "chalk"
+    ],
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": []
+    },
+    "name": "dialysis-calc",
+    "shortName": "Dialysis Calc",
+    "longName": "Dialysis Calc",
+    "versionLabel": "1.0",
+    "companyName": "Pebble Developer",
+    "messageKeys": {},
+    "appKeys": {},
+    "capabilities": []
+}
