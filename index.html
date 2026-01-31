@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dialysis Calc - Pebble Smartwatch App</title>
+    <style>
+        :root {
+            --primary: #00a99d;
+            --primary-dark: #008f85;
+            --secondary: #2c3e50;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #1a1a2e;
+            --pebble-screen: #c5d6c5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--secondary);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 80px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        header .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            margin: 5px;
+            position: relative;
+        }
+
+        /* Pebble Watch Mockup */
+        .watch-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: -60px auto 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .pebble-watch {
+            background: #333;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .pebble-watch.round {
+            border-radius: 50%;
+            padding: 20px;
+        }
+
+        .pebble-screen {
+            background: var(--pebble-screen);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 10px;
+            color: #1a1a1a;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        .pebble-watch:not(.round) .pebble-screen {
+            width: 144px;
+            height: 168px;
+        }
+
+        .pebble-watch.round .pebble-screen {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .screen-title {
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #999;
+            padding-bottom: 5px;
+            margin-bottom: 8px;
+        }
+
+        .screen-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+        }
+
+        .screen-label {
+            color: #555;
+        }
+
+        .screen-value {
+            font-weight: bold;
+        }
+
+        .screen-highlight {
+            background: #555;
+            color: var(--pebble-screen);
+            padding: 1px 4px;
+        }
+
+        /* Sections */
+        section {
+            padding: 60px 0;
+        }
+
+        section:nth-child(even) {
+            background: white;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            text-align: center;
+            color: var(--secondary);
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--primary);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        section:nth-child(even) .feature-card {
+            background: var(--light);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Workflow */
+        .workflow {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .workflow-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+
+        .step-content p {
+            color: #666;
+        }
+
+        /* Specs Table */
+        .specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .specs-table th,
+        .specs-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .specs-table th {
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .specs-table tr:hover td {
+            background: #f8f9fa;
+        }
+
+        /* Devices */
+        .devices {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .device {
+            text-align: center;
+        }
+
+        .device-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .device h4 {
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .device p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Download Section */
+        .download-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .download-section h2 {
+            color: white;
+        }
+
+        .download-section h2::after {
+            background: white;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 15px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .download-btn.secondary {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .download-note {
+            margin-top: 20px;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer p {
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 0 10px 10px 0;
+            text-align: left;
+        }
+
+        .disclaimer h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .disclaimer p {
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            header .tagline {
+                font-size: 1rem;
+            }
+
+            .watch-container {
+                gap: 20px;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .workflow {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Dialysis Calc</h1>
+            <p class="tagline">Fluid removal tracking for hemodialysis patients</p>
+            <span class="badge">Pebble Smartwatch</span>
+            <span class="badge">Medical Utility</span>
+            <span class="badge">Open Source</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="watch-container">
+            <div class="pebble-watch">
+                <div class="pebble-screen">
+                    <div class="screen-title">PRE-TREATMENT</div>
+                    <div class="screen-row">
+                        <span class="screen-label">Pre:</span>
+                        <span class="screen-value screen-highlight">75.3 kg</span>
+                    </div>
+                    <div class="screen-row">
+                        <span class="screen-label">Dry:</span>
+                        <span class="screen-value">72.0 kg</span>
+                    </div>
+                    <div class="screen-row">
+                        <span class="screen-label">Time:</span>
+                        <span class="screen-value">3:30</span>
+                    </div>
+                    <div class="screen-row">
+                        <span class="screen-label">Delta:</span>
+                        <span class="screen-value">0.2 kg</span>
+                    </div>
+                    <div style="border-top: 1px solid #999; margin-top: 8px; padding-top: 8px;">
+                        <div class="screen-row">
+                            <span class="screen-label">K:</span>
+                            <span class="screen-value">3.3 kg</span>
+                        </div>
+                        <div class="screen-row">
+                            <span class="screen-label">UFR:</span>
+                            <span class="screen-value">0.94/hr</span>
+                        </div>
+                        <div class="screen-row">
+                            <span class="screen-label">Range:</span>
+                            <span class="screen-value">3.1-3.5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pebble-watch">
+                <div class="pebble-screen">
+                    <div class="screen-title">POST-TREATMENT</div>
+                    <div class="screen-row">
+                        <span class="screen-label">Post:</span>
+                        <span class="screen-value screen-highlight">72.1 kg</span>
+                    </div>
+                    <div style="border-top: 1px solid #999; margin-top: 8px; padding-top: 8px;">
+                        <div class="screen-row">
+                            <span class="screen-label">Removed:</span>
+                            <span class="screen-value">3.2 kg</span>
+                        </div>
+                        <div class="screen-row">
+                            <span class="screen-label">Goal:</span>
+                            <span class="screen-value">3.3 kg</span>
+                        </div>
+                        <div class="screen-row">
+                            <span class="screen-label">Var:</span>
+                            <span class="screen-value" style="color: #c0392b;">-0.1 kg</span>
+                        </div>
+                        <div class="screen-row">
+                            <span class="screen-label">Achieved:</span>
+                            <span class="screen-value">97.0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pebble-watch round">
+                <div class="pebble-screen">
+                    <div style="font-weight: bold; margin-bottom: 5px;">DIALYSIS CALC</div>
+                    <div style="font-size: 10px;">K: 3.3 kg</div>
+                    <div style="font-size: 10px;">UFR: 0.94/hr</div>
+                    <div style="font-size: 9px; margin-top: 5px; color: #555;">Time Round</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section>
+        <div class="container">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#9878;</div>
+                    <h3>Pre-Treatment Calculations</h3>
+                    <p>Enter your pre-treatment weight and dry weight target to automatically calculate fluid removal goals, UFR, and expected ranges.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128200;</div>
+                    <h3>Real-Time Metrics</h3>
+                    <p>View ultrafiltration rate (UFR), optimistic and pessimistic removal estimates, and goal targets at a glance during treatment.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9989;</div>
+                    <h3>Post-Treatment Analysis</h3>
+                    <p>Track actual fluid removal, calculate variance from goals, and see your achievement percentage with color-coded feedback.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128190;</div>
+                    <h3>History Storage</h3>
+                    <p>Automatically stores up to 15 treatment records in a circular buffer for trend analysis and record keeping.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128260;</div>
+                    <h3>Session Recovery</h3>
+                    <p>Automatically resume interrupted treatment sessions. Your data is preserved even if you exit the app mid-treatment.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#9201;</div>
+                    <h3>Always On Your Wrist</h3>
+                    <p>Quick, discrete access to treatment metrics without reaching for your phone during 3-4 hour dialysis sessions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Treatment Workflow</h2>
+            <div class="workflow">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Enter Pre-Treatment Data</h3>
+                        <p>Input your current weight, dry weight target, treatment duration (1-8 hours), and delta tolerance (0.2 or 0.4 kg). The app calculates your goal removal (K), UFR, and expected range.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Monitor During Treatment</h3>
+                        <p>Reference your calculated metrics at any time during your dialysis session. The app stays ready on your wrist for quick checks.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Record Post-Treatment Weight</h3>
+                        <p>Long-press SELECT to move to post-treatment. Enter your final weight to see actual removal, variance from goal, and achievement percentage.</p>
+                    </div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Save and Review</h3>
+                        <p>Press SELECT to save the treatment to history. Your data is stored for future reference, and the app resets for your next session.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Supported Devices</h2>
+            <div class="devices">
+                <div class="device">
+                    <div class="device-icon">&#8862;</div>
+                    <h4>Pebble Original / Steel</h4>
+                    <p>Aplite Platform<br>144x168 monochrome</p>
+                </div>
+                <div class="device">
+                    <div class="device-icon">&#8862;</div>
+                    <h4>Pebble Time / Steel</h4>
+                    <p>Basalt Platform<br>144x168 64-color LCD</p>
+                </div>
+                <div class="device">
+                    <div class="device-icon">&#9711;</div>
+                    <h4>Pebble Time Round</h4>
+                    <p>Chalk Platform<br>180x180 circular LCD</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Technical Specifications</h2>
+            <table class="specs-table">
+                <tr>
+                    <th>Specification</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Memory Footprint</td>
+                    <td>&lt; 10 KB RAM</td>
+                </tr>
+                <tr>
+                    <td>Persistent Storage</td>
+                    <td>~1 KB (15 treatment records)</td>
+                </tr>
+                <tr>
+                    <td>Weight Input Range</td>
+                    <td>30.0 - 200.0 kg (0.1 kg precision)</td>
+                </tr>
+                <tr>
+                    <td>Treatment Duration</td>
+                    <td>1 - 8 hours (15-minute increments)</td>
+                </tr>
+                <tr>
+                    <td>Delta Options</td>
+                    <td>0.2 kg or 0.4 kg</td>
+                </tr>
+                <tr>
+                    <td>History Capacity</td>
+                    <td>15 treatments (circular buffer)</td>
+                </tr>
+                <tr>
+                    <td>Numerical Precision</td>
+                    <td>Fixed-point arithmetic (no floats)</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section class="download-section">
+        <div class="container">
+            <h2>Get Dialysis Calc</h2>
+            <p style="margin-bottom: 30px; font-size: 1.1rem;">Download the app or build from source</p>
+            <a href="build/pebble-app.pbw" class="download-btn">Download .pbw</a>
+            <a href="https://github.com" class="download-btn secondary">View on GitHub</a>
+            <p class="download-note">Transfer the .pbw file to your phone and open with the Pebble app to install.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Building from Source</h2>
+            <div class="workflow">
+                <pre style="background: var(--dark); color: #a8e6cf; padding: 20px; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 0.9rem;"><code># Clone the repository
+git clone https://github.com/your-username/pebble-app.git
+cd pebble-app
+
+# Build for all platforms
+./pebble.sh build
+
+# Install to emulator
+./pebble.sh install --emulator basalt
+
+# Install to watch via phone
+./pebble.sh install --phone &lt;phone-ip-address&gt;</code></pre>
+            </div>
+
+            <div class="disclaimer">
+                <h4>Medical Disclaimer</h4>
+                <p>This application is intended as a convenience tool for tracking dialysis treatment metrics. It is <strong>not a medical device</strong> and should not be used as a substitute for professional medical judgment. Always follow your healthcare provider's instructions for dialysis treatment management.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p><strong>Dialysis Calc</strong> - A Pebble Smartwatch Application</p>
+            <p>Open source project - <a href="https://github.com">View on GitHub</a></p>
+            <p style="margin-top: 20px; font-size: 0.85rem; opacity: 0.7;">Built with care for dialysis patients and healthcare professionals</p>
+        </div>
+    </footer>
+</body>
+</html>
