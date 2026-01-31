@@ -645,7 +645,7 @@ percentage  = (actual * 1000) / k_goal  // Result × 10
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/grahamg/dialysis-pebble-app
    cd pebble-app
    ```
 
